@@ -34,4 +34,11 @@ button {
 }
 #main {
     margin: 1em;
+    text-align:center;
+}
+#main>canvas {
+    cursor:crosshair;
+    margin: 1em auto;
+    background-color: white;
+    box-shadow: 0 0 8px 2px #555;
 }
