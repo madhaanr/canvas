@@ -1,6 +1,6 @@
 "use strict";
 
-function MyApp() {
+function CanvasPadApp() {
     var version="v1.0";
     
     function setStatus(message) {
@@ -12,6 +12,6 @@ function MyApp() {
     };
 }
 $(function() {
-   window.app=new MyApp();
+   window.app=new CanvasPadApp();
    window.app.start();
 });
