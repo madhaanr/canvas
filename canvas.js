@@ -6,6 +6,8 @@ function CanvasPadApp() {
             toolbar = new Toolbar($("#toolbar")),
             drawing = false,
             points = [],
+            curTool = "pen",
+            curAction = newAction(curTool),
             actions = [];
 
     function setStatus(message) {
@@ -31,16 +33,17 @@ function CanvasPadApp() {
 
     function penDown(pageX, pageY) {
         drawing = true;
-        points = [];
-        points.push(canvas2d.getCanvasPoint(pageX, pageY));
-        actions.push(points);
+        curAction = newAction(curTool);
+        curAction.points.push(
+                canvas2d.getCanvasPoint(pageX, pageY));
+        actions.push(curAction);
     }
 
     function penMoved(pageX, pageY) {
         var canvasPoint = canvas2d.getCanvasPoint(pageX, pageY);
         showCoordinates(canvasPoint);
         if (drawing) {
-            points.push(canvasPoint);
+            curAction.points.push(canvasPoint);
             redraw();
         }
     }
@@ -50,14 +53,25 @@ function CanvasPadApp() {
     }
 
     function penUp() {
-        drawing = false;
+        if (drawing) {
+            drawing = false;
+            if(curAction.points.length<2) {
+                actions.pop();
+            }
+        }
     }
 
     function redraw() {
         canvas2d.clear();
+        canvas2d.savePen();
         for (var i in actions) {
-            canvas2d.drawPoints(actions[i]);
+            var action = actions[i];
+            canvas2d.penColor(action.color)
+                    .penWidth(action.width)
+                    .penOpacity(action.opacity);
+            canvas2d.drawPoints(action.points);
         }
+        canvas2d.restorePen();
     }
 
     function toolbarButtonClicked(action) {
@@ -74,7 +88,6 @@ function CanvasPadApp() {
                 break;
         }
     }
-    ;
 
     function menuItemClicked(option, value) {
         canvas2d[option](value);
@@ -85,7 +98,6 @@ function CanvasPadApp() {
             $(e).css("background-color", $(e).data("value"));
         });
     }
-    ;
 
     function initWidthMenu() {
         $("#width-menu li").each(function (i, e) {
@@ -93,7 +105,16 @@ function CanvasPadApp() {
                     $(e).data("value") + "px solid black");
         });
     }
-    ;
+
+    function newAction(tool) {
+        return {
+            tool: tool,
+            color: canvas2d.penColor(),
+            width: canvas2d.penWidth(),
+            opacity: canvas2d.penOpacity(),
+            points: []
+        };
+    }
 
     this.start = function () {
         toolbar.toolbarButtonClicked = toolbarButtonClicked;
